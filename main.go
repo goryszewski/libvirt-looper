@@ -24,24 +24,36 @@ type networks struct {
 }
 
 type test_net struct {
-	Output networks `json:"return"`
+	Return []networks `json:"return"`
 }
 
-func fget_ip(domain string) {
+type command struct {
+	Execute string `json:"execute"`
+}
 
-	cmd := exec.Command("virsh", "qemu-agent-command", domain, "{\"execute\":\"guest-network-get-interfaces\"}")
-
+func cmd(domain string, execute string) []byte {
+	test1 := command{Execute: execute}
+	execommand, _ := json.Marshal(test1)
+	cmd := exec.Command("virsh", "qemu-agent-command", domain, fmt.Sprintf("%+v", string(execommand)))
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
+	return out.Bytes()
+}
+
+func fget_ip(domain string) {
+	out := cmd(domain, "guest-network-get-interfaces") // https://qemu-project.gitlab.io/qemu/interop/qemu-ga-ref.html
 	var test test_net
-	fmt.Printf("%v\n", out)
+	err := json.Unmarshal(out, &test)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	json.Unmarshal(out.Bytes(), &test)
-
-	fmt.Printf("translated phrase: %+v\n", test)
+	for _, item := range test.Return {
+		fmt.Printf("[%v]\n", item)
+	}
 
 }
 
@@ -59,8 +71,8 @@ func main() {
 
 		for _, item := range doms {
 			name, err := item.GetName()
+			fmt.Printf("---------------[%v] [%v]\n", name, err)
 			fget_ip(name)
-			fmt.Printf("[%v] [%v]\n", name, err)
 
 			// hostname, err := item.GetHostname(libvirt.DOMAIN_GET_HOSTNAME_AGENT)
 			// fmt.Printf("[%v] [%v]\n", hostname, err)
