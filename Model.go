@@ -7,3 +7,29 @@ type SSH_ADD struct {
 	Keys     []string `json:"keys"`
 	Reset    bool     `json:"reset"`
 }
+
+type QAX_args struct {
+	Path string   `json:"path"`
+	Arg  []string `json:"arg"`
+}
+
+type inter struct {
+	IPType   string `json:"ip-address-type"`
+	IpAddres string `json:"ip-address"`
+	Prefix   int    `json:"prefix"`
+}
+
+type networks struct {
+	Name     string  `json:"name"`
+	Ip       []inter `json:"ip-addresses"`
+	Hardware string  `json:"hardware-address"`
+}
+
+type test_net struct {
+	Return []networks `json:"return"`
+}
+
+type command struct {
+	Execute   string `json:"execute"`
+	Arguments any    `json:"arguments,omitempty"`
+}
