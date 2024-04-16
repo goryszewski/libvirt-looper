@@ -6,8 +6,13 @@ import (
 	"strings"
 	"time"
 
+	libvirtxml "github.com/libvirt/libvirt-go-xml"
 	"libvirt.org/libvirt-go"
 )
+
+func create_domain(con any) {
+
+}
 
 func main() {
 	fmt.Println("Init Looper")
@@ -16,10 +21,34 @@ func main() {
 		fmt.Println(err)
 	}
 	for true {
+
 		doms, err := conn.ListAllDomains(libvirt.CONNECT_LIST_DOMAINS_ACTIVE)
 		if err != nil {
 			fmt.Println(err)
 		}
+		domcfg := &libvirtxml.Domain{
+			Type:   "kvm",
+			Name:   "demo",
+			Memory: &libvirtxml.DomainMemory{Value: 4096, Unit: "MB", DumpCore: "on"},
+			VCPU:   &libvirtxml.DomainVCPU{Value: 1},
+			CPU:    &libvirtxml.DomainCPU{Mode: "host-model"},
+			OS:     &libvirtxml.DomainOS{Type: &libvirtxml.DomainOSType{Arch: "x86_64", Machine: "pc-i440fx-mantic", Type: "hvm"}},
+		}
+		xml, err := domcfg.Marshal()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(xml)
+		domain, err := conn.DomainDefineXML(xml)
+		if err != nil {
+			panic(err)
+		}
+		createDomain, err := conn.DomainCreateXML(xml, 0)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(domain)
+		fmt.Println(createDomain)
 
 		for _, item := range doms {
 			// bo, err := item.IsActive()
