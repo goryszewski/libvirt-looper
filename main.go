@@ -6,13 +6,8 @@ import (
 	"strings"
 	"time"
 
-	libvirtxml "github.com/libvirt/libvirt-go-xml"
 	"libvirt.org/libvirt-go"
 )
-
-func create_domain(con any) {
-
-}
 
 func main() {
 	fmt.Println("Init Looper")
@@ -26,14 +21,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		domcfg := &libvirtxml.Domain{
-			Type:   "kvm",
-			Name:   "demo",
-			Memory: &libvirtxml.DomainMemory{Value: 4096, Unit: "MB", DumpCore: "on"},
-			VCPU:   &libvirtxml.DomainVCPU{Value: 1},
-			CPU:    &libvirtxml.DomainCPU{Mode: "host-model"},
-			OS:     &libvirtxml.DomainOS{Type: &libvirtxml.DomainOSType{Arch: "x86_64", Machine: "pc-i440fx-mantic", Type: "hvm"}},
-		}
+		domcfg := create_domain("test")
 		xml, err := domcfg.Marshal()
 		if err != nil {
 			panic(err)
